@@ -78,6 +78,9 @@ export async function scanPokemonCardImage(
     52
   );
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 25000);
+
   const res = await fetch("/api/tcg/scan", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -85,7 +88,10 @@ export async function scanPokemonCardImage(
       imageDataUrl: ocrDataUrl,
       language,
     }),
+    signal: controller.signal,
   });
+
+  clearTimeout(timeoutId);
 
   if (!res.ok) {
     const err = (await res.json().catch(() => ({}))) as { error?: string };

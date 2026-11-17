@@ -324,6 +324,17 @@ export function CardScanner({
       setDetectedInfo(null);
       setCandidates([]);
 
+      // Safety: if scan takes > 28s, stop and let user enter manually
+      const safetyTimer = setTimeout(() => {
+        if (scanning) {
+          setScanning(false);
+          setSearchMessage(
+            "Scan took too long (photo may be too large or blurry). Enter the Pokémon name + bottom card # manually on the right, or tap 'Save custom card with my photo'."
+          );
+          setShowManualForm(true);
+        }
+      }, 28000);
+
       try {
         const scanned = await scanPokemonCardImage(
           sourceUrl,
@@ -333,6 +344,8 @@ export function CardScanner({
             setScanPercent(pct);
           }
         );
+
+        clearTimeout(safetyTimer);
 
         setCapturedDataUrl(scanned.capturedDataUrl);
         setPokemonName(scanned.pokemonName);
@@ -386,6 +399,7 @@ export function CardScanner({
           }
         }
       } catch (err) {
+        clearTimeout(safetyTimer);
         setScanning(false);
         setSearchMessage(
           err instanceof Error
@@ -522,7 +536,7 @@ export function CardScanner({
           quantity: 1,
           forSale: defaultForSale,
           capturedPhotoDataUrl: capturedDataUrl,
-          imageUrl: "",
+          imageUrl: capturedDataUrl,
         }),
       });
       if (res.ok) {
@@ -818,6 +832,19 @@ export function CardScanner({
                           style={{ width: `${scanPercent}%` }}
                         />
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setScanning(false);
+                          setSearchMessage(
+                            "Skipped OCR. Enter Pokémon name + bottom card # manually, or save with your photo."
+                          );
+                          setShowManualForm(true);
+                        }}
+                        className="mt-2 w-full cursor-pointer rounded-lg bg-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white/30"
+                      >
+                        Skip OCR & Enter Manually
+                      </button>
                     </div>
                   </>
                 )}
