@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+.font-display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-mono-num {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Holographic Pokemon Card Foil Shimmer */
+.holo-pocket {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.875rem;
+  transform: translateZ(0);
+}
+
+.holo-pocket::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(
+    118deg,
+    transparent 34%,
+    rgba(255, 224, 115, 0.24) 43%,
+    rgba(110, 231, 255, 0.26) 49%,
+    rgba(244, 114, 182, 0.24) 55%,
+    rgba(255, 255, 255, 0.34) 60%,
+    transparent 68%
+  );
+  transform: translateX(-75%) rotate(6deg);
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.group:hover .holo-pocket::after {
+  transform: translateX(75%) rotate(6deg);
+  opacity: 1;
+}
+
+/* Subtle binder dot grid texture */
+.binder-surface {
+  background-color: #faf8f4;
+  background-image: radial-gradient(rgba(22, 27, 46, 0.045) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Pokedex Card Scanner Beam */
+@keyframes scanSweep {
+  0% {
+    top: 6%;
+    opacity: 0.75;
+  }
+  50% {
+    top: 90%;
+    opacity: 1;
+  }
+  100% {
+    top: 6%;
+    opacity: 0.75;
+  }
+}
+
+.scan-beam {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #facc15 20%,
+    #e3350d 50%,
+    #facc15 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 14px 3px rgba(227, 53, 13, 0.65);
+  animation: scanSweep 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Hide scrollbar on horizontal type filter bar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
