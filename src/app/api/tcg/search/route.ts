@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { ScanLanguageMode } from "@/lib/constants";
 import { searchOnlineTcgCards } from "@/lib/tcg";
 
 export async function GET(request: Request) {
@@ -8,11 +9,16 @@ export async function GET(request: Request) {
     const number =
       searchParams.get("number") || searchParams.get("cardNumber") || "";
     const setTotal = searchParams.get("setTotal") || "";
+    const setCode = searchParams.get("setCode") || "";
+    const rarityCode = searchParams.get("rarity") || "";
+    const langParam = searchParams.get("language") || "auto";
+    const language: ScanLanguageMode =
+      langParam === "ja" || langParam === "en" ? langParam : "auto";
     const limitParam = parseInt(searchParams.get("limit") || "10", 10);
 
-    if (!name.trim() && !number.trim()) {
+    if (!name.trim() && !number.trim() && !setCode.trim()) {
       return NextResponse.json(
-        { error: "Please provide a Pokémon name or card number to search." },
+        { error: "Please provide a Pokémon name, set code, or card number to search." },
         { status: 400 }
       );
     }
@@ -21,12 +27,15 @@ export async function GET(request: Request) {
       name,
       cardNumber: number,
       setTotal,
+      setCode,
+      rarityCode,
+      language,
       limit: Number.isFinite(limitParam) ? limitParam : 10,
     });
 
     return NextResponse.json({
       results,
-      query: { name, number, setTotal },
+      query: { name, number, setTotal, setCode, language },
     });
   } catch (err) {
     console.error("TCG lookup error:", err);

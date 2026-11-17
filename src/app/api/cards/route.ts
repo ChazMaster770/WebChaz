@@ -175,6 +175,10 @@ export async function POST(request: Request) {
         imageUrl: finalImageUrl,
         capturedPhotoUrl,
         photoId,
+        language:
+          body.language === "Japanese" || body.language === "ja"
+            ? "Japanese"
+            : "English",
         variant:
           typeof body.variant === "string" && body.variant.trim()
             ? body.variant.trim()

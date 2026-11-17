@@ -61,7 +61,8 @@ export async function POST(request: Request) {
       )
       .map((i) => ({
         cardId: Number(i.cardId) || 0,
-        name: String(i.name).slice(0, 120),
+        name: String(i.name).slice(0, 140),
+        language: i.language === "Japanese" ? "Japanese" : "English",
         cardNumber: String(i.cardNumber || "").slice(0, 30),
         setTotal: i.setTotal ? String(i.setTotal).slice(0, 30) : null,
         setName: String(i.setName || "Pokémon TCG").slice(0, 120),

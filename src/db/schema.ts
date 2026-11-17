@@ -26,6 +26,7 @@ export const collectionCards = pgTable("collection_cards", {
   imageUrl: text("image_url").notNull(),
   capturedPhotoUrl: text("captured_photo_url"),
   photoId: integer("photo_id"),
+  language: text("language").default("English").notNull(),
   variant: text("variant").default("Holofoil").notNull(),
   condition: text("condition").default("Near Mint").notNull(),
   price: numeric("price", { precision: 10, scale: 2 }).default("0.00").notNull(),

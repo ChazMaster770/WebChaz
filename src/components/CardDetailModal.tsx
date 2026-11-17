@@ -149,8 +149,14 @@ export function CardDetailModal({
           {/* Right: Collector Specs & Basket CTA */}
           <div className="flex flex-col justify-between p-6 md:col-span-7 md:p-7">
             <div>
-              {/* Top Type + HP + Card Number */}
+              {/* Top Type + Language + HP + Card Number */}
               <div className="flex flex-wrap items-center gap-2 pr-8">
+                {card.language === "Japanese" && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-xs font-extrabold text-[#E3350D]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#E3350D]" />
+                    JP 日本語
+                  </span>
+                )}
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${typeStyle.bg} ${typeStyle.text} ${typeStyle.border}`}
                 >

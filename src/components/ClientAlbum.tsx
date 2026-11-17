@@ -55,6 +55,7 @@ export function ClientAlbum({ initialCards }: { initialCards: AlbumCard[] }) {
               valid.push({
                 cardId: live.id,
                 name: live.name,
+                language: live.language,
                 cardNumber: live.cardNumber,
                 setTotal: live.setTotal,
                 setName: live.setName,
@@ -137,6 +138,7 @@ export function ClientAlbum({ initialCards }: { initialCards: AlbumCard[] }) {
           {
             cardId: card.id,
             name: card.name,
+            language: card.language,
             cardNumber: card.cardNumber,
             setTotal: card.setTotal,
             setName: card.setName,
@@ -228,6 +230,8 @@ export function ClientAlbum({ initialCards }: { initialCards: AlbumCard[] }) {
       return (
         card.name.toLowerCase().includes(q) ||
         card.setName.toLowerCase().includes(q) ||
+        (card.setId || "").toLowerCase().includes(q) ||
+        (card.language || "").toLowerCase().includes(q) ||
         card.cardNumber.toLowerCase().includes(q) ||
         numCombined.includes(q) ||
         card.rarity.toLowerCase().includes(q) ||

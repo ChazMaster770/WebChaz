@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["tesseract.js", "sharp"],
   images: {
     remotePatterns: [
       {
@@ -10,6 +11,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "images.pokemontcg.io",
+      },
+      {
+        protocol: "https",
+        hostname: "limitlesstcg.nyc3.cdn.digitaloceanspaces.com",
       },
     ],
   },

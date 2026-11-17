@@ -27,6 +27,7 @@ export interface AlbumCard {
   imageUrl: string;
   capturedPhotoUrl: string | null;
   photoId: number | null;
+  language: string;
   variant: string;
   condition: string;
   price: string;
@@ -38,9 +39,13 @@ export interface AlbumCard {
   updatedAt: string;
 }
 
+export type ScanLanguageMode = "auto" | "ja" | "en";
+
 export interface TcgCardCandidate {
   tcgId: string;
+  language: "Japanese" | "English";
   name: string;
+  nativeName?: string;
   cardNumber: string;
   setTotal: string | null;
   setName: string;
@@ -61,6 +66,7 @@ export interface TcgCardCandidate {
 export interface BasketItem {
   cardId: number;
   name: string;
+  language?: string;
   cardNumber: string;
   setTotal: string | null;
   setName: string;
@@ -252,8 +258,9 @@ export function buildWhatsAppMessage(
     totalCards += item.quantity;
     totalAmount += lineTotal;
     const numLabel = formatCardNumber(item.cardNumber, item.setTotal);
+    const langTag = item.language === "Japanese" ? "[JP] " : "";
     lines.push(
-      `${index + 1}. *${item.name}* (${numLabel} · ${item.setName}) — ${item.condition} × ${item.quantity} = *${formatPrice(lineTotal)}*`
+      `${index + 1}. ${langTag}*${item.name}* (${numLabel} · ${item.setName}) — ${item.condition} × ${item.quantity} = *${formatPrice(lineTotal)}*`
     );
   });
 

@@ -79,6 +79,9 @@ export async function PATCH(
     if (typeof body.condition === "string" && body.condition.trim()) {
       updates.condition = body.condition.trim();
     }
+    if (body.language === "Japanese" || body.language === "English") {
+      updates.language = body.language;
+    }
     if (typeof body.variant === "string" && body.variant.trim()) {
       updates.variant = body.variant.trim();
     }

@@ -699,6 +699,11 @@ export function AdminPortal({ initialAuthed }: { initialAuthed: boolean }) {
                                 </div>
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-1.5">
+                                    {card.language === "Japanese" && (
+                                      <span className="rounded bg-rose-50 px-1.5 py-0.5 text-[9px] font-extrabold text-[#E3350D] ring-1 ring-rose-200">
+                                        JP
+                                      </span>
+                                    )}
                                     <span className="font-display text-sm font-bold text-[#161B2E]">
                                       {card.name}
                                     </span>

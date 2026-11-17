@@ -107,6 +107,11 @@ export function PokemonCardTile({
 
           {/* Compact Secondary Metadata Row */}
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {card.language === "Japanese" && (
+              <span className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-1.5 py-0.5 text-[10px] font-extrabold tracking-wide text-[#E3350D]">
+                JP
+              </span>
+            )}
             <span
               className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-bold tracking-wide ${condMeta.className}`}
             >
@@ -120,6 +125,8 @@ export function PokemonCardTile({
             </span>
             {card.rarity &&
               (card.rarity.toLowerCase().includes("illustration") ||
+                card.rarity.toLowerCase().includes("special art") ||
+                card.rarity.toLowerCase().includes("art rare") ||
                 card.rarity.toLowerCase().includes("secret") ||
                 card.rarity.toLowerCase().includes("hyper")) && (
                 <span
@@ -127,7 +134,11 @@ export function PokemonCardTile({
                   className="inline-flex items-center gap-0.5 rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800"
                 >
                   <Sparkles className="h-2.5 w-2.5 text-amber-500" />
-                  SIR/Alt
+                  {card.language === "Japanese"
+                    ? card.rarity.includes("(AR)")
+                      ? "AR"
+                      : "SAR"
+                    : "SIR/Alt"}
                 </span>
               )}
           </div>
