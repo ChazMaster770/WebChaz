@@ -3,6 +3,7 @@ import { desc } from "drizzle-orm";
 import { db } from "@/db";
 import { orderInquiries } from "@/db/schema";
 import { isAdminAuthenticated } from "@/lib/auth";
+import { describeDbError, ensureDatabaseReady } from "@/lib/db-init";
 import {
   buildWhatsAppMessage,
   buildWhatsAppUrl,
@@ -19,6 +20,7 @@ export async function GET() {
       );
     }
 
+    await ensureDatabaseReady();
     const inquiries = await db
       .select()
       .from(orderInquiries)
@@ -96,6 +98,7 @@ export async function POST(request: Request) {
         ? body.buyerNote.trim().slice(0, 300)
         : null;
 
+    await ensureDatabaseReady();
     const [created] = await db
       .insert(orderInquiries)
       .values({
@@ -125,9 +128,6 @@ export async function POST(request: Request) {
     );
   } catch (err) {
     console.error("Error creating WhatsApp inquiry:", err);
-    return NextResponse.json(
-      { error: "Failed to record order inquiry." },
-      { status: 500 }
-    );
+    return NextResponse.json(describeDbError(err), { status: 500 });
   }
 }

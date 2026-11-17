@@ -73,6 +73,14 @@ export function AdminPortal({ initialAuthed }: { initialAuthed: boolean }) {
   const [savingEdit, setSavingEdit] = useState(false);
   const [busyCardId, setBusyCardId] = useState<number | null>(null);
   const [statusToast, setStatusToast] = useState<string | null>(null);
+  const [dbStatus, setDbStatus] = useState<{
+    configured: boolean;
+    connected: boolean;
+    tablesReady: boolean;
+    error?: string;
+    hint?: string;
+  } | null>(null);
+  const [dbFixing, setDbFixing] = useState(false);
 
   const notify = useCallback((msg: string) => {
     setStatusToast(msg);
@@ -83,6 +91,47 @@ export function AdminPortal({ initialAuthed }: { initialAuthed: boolean }) {
     const timer = setTimeout(() => setStatusToast(null), 2600);
     return () => clearTimeout(timer);
   }, [statusToast]);
+
+  const refreshDbStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/db/status", { cache: "no-store" });
+      const data = (await res.json()) as {
+        configured: boolean;
+        connected: boolean;
+        tablesReady: boolean;
+        error?: string;
+        hint?: string;
+      };
+      setDbStatus(data);
+      return data;
+    } catch {
+      setDbStatus({
+        configured: false,
+        connected: false,
+        tablesReady: false,
+        error: "Could not reach the database status endpoint.",
+      });
+      return null;
+    }
+  }, []);
+
+  const runDbSetup = useCallback(async () => {
+    setDbFixing(true);
+    try {
+      const res = await fetch("/api/db/status", { method: "POST" });
+      const data = (await res.json()) as { success?: boolean; hint?: string };
+      if (data.success) {
+        notify("Database tables are ready");
+        await refreshDbStatus();
+        await fetchAdminData();
+      } else {
+        notify(data.hint || "Database setup failed");
+        await refreshDbStatus();
+      }
+    } finally {
+      setDbFixing(false);
+    }
+  }, [notify, refreshDbStatus]);
 
   const fetchAdminData = useCallback(async () => {
     setLoadingData(true);
@@ -110,8 +159,9 @@ export function AdminPortal({ initialAuthed }: { initialAuthed: boolean }) {
   useEffect(() => {
     if (authenticated) {
       void fetchAdminData();
+      void refreshDbStatus();
     }
-  }, [authenticated, fetchAdminData]);
+  }, [authenticated, fetchAdminData, refreshDbStatus]);
 
   const handleLogin = async (e?: React.FormEvent, overridePin?: string) => {
     if (e) e.preventDefault();
@@ -476,6 +526,57 @@ export function AdminPortal({ initialAuthed }: { initialAuthed: boolean }) {
       </header>
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        {dbStatus && !dbStatus.tablesReady && (
+          <section className="mb-5 overflow-hidden rounded-2xl border border-rose-200 bg-rose-50">
+            <div className="p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 className="font-display text-sm font-extrabold text-[#7F1D1D]">
+                    ⚠️ Database not ready — cards cannot be saved yet
+                  </h2>
+                  <p className="mt-1 text-xs text-rose-900">
+                    {dbStatus.error || "The database tables are missing."}
+                  </p>
+                  {dbStatus.hint && (
+                    <p className="mt-1.5 rounded-lg bg-white/70 px-3 py-2 font-mono-num text-[11px] leading-relaxed text-rose-900">
+                      {dbStatus.hint}
+                    </p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void runDbSetup()}
+                    disabled={dbFixing}
+                    className="cursor-pointer rounded-xl bg-[#E3350D] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#C62B07] disabled:opacity-60"
+                  >
+                    {dbFixing ? "Setting up..." : "Set up database tables"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void refreshDbStatus()}
+                    className="cursor-pointer rounded-xl border border-rose-300 bg-white px-3 py-2 text-xs font-bold text-rose-800 hover:bg-rose-100"
+                  >
+                    Recheck
+                  </button>
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] text-rose-800/80">
+                On Vercel: add <span className="font-mono-num font-bold">DATABASE_URL</span> in
+                Project → Settings → Environment Variables, redeploy, then press
+                &ldquo;Set up database tables&rdquo;.
+              </p>
+            </div>
+          </section>
+        )}
+
+        {dbStatus?.tablesReady && (
+          <div className="mb-5 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-[11px] font-semibold text-emerald-800">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            Database connected · tables ready · {cards.length} cards stored
+          </div>
+        )}
+
         {/* KPI Row */}
         <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <div className="rounded-2xl border border-[#E8E2D6] bg-white p-4 shadow-2xs">

@@ -2,6 +2,7 @@ import { desc } from "drizzle-orm";
 import { db } from "@/db";
 import { collectionCards } from "@/db/schema";
 import { ensureSeeded } from "@/db/seed";
+import { ensureDatabaseReady } from "@/lib/db-init";
 import { ClientAlbum } from "@/components/ClientAlbum";
 import type { AlbumCard } from "@/lib/constants";
 
@@ -11,6 +12,7 @@ export default async function HomePage() {
   let cards: AlbumCard[] = [];
 
   try {
+    await ensureDatabaseReady();
     await ensureSeeded();
     const rows = await db
       .select()

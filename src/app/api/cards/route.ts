@@ -4,9 +4,11 @@ import { db } from "@/db";
 import { cardPhotos, collectionCards } from "@/db/schema";
 import { ensureSeeded } from "@/db/seed";
 import { isAdminAuthenticated } from "@/lib/auth";
+import { describeDbError, ensureDatabaseReady } from "@/lib/db-init";
 
 export async function GET() {
   try {
+    await ensureDatabaseReady();
     await ensureSeeded();
 
     const cards = await db
@@ -17,10 +19,7 @@ export async function GET() {
     return NextResponse.json({ cards });
   } catch (err) {
     console.error("Error fetching collection cards:", err);
-    return NextResponse.json(
-      { error: "Failed to load collection cards." },
-      { status: 500 }
-    );
+    return NextResponse.json({ cards: [], ...describeDbError(err) }, { status: 200 });
   }
 }
 
@@ -49,6 +48,7 @@ export async function POST(request: Request) {
       );
     }
 
+    await ensureDatabaseReady();
     await ensureSeeded();
     const body = (await request.json()) as Record<string, unknown>;
 
@@ -93,13 +93,6 @@ export async function POST(request: Request) {
     const rawImageUrl =
       typeof body.imageUrl === "string" ? body.imageUrl.trim() : "";
     const finalImageUrl = rawImageUrl || capturedPhotoUrl || "";
-
-    if (!finalImageUrl) {
-      return NextResponse.json(
-        { error: "Card image or captured photo is required." },
-        { status: 400 }
-      );
-    }
 
     const parsedMarket =
       body.marketPrice !== undefined && body.marketPrice !== null && body.marketPrice !== ""
@@ -201,9 +194,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ card: created }, { status: 201 });
   } catch (err) {
     console.error("Error adding card:", err);
-    return NextResponse.json(
-      { error: "Failed to save card to collection." },
-      { status: 500 }
-    );
+    const info = describeDbError(err);
+    return NextResponse.json(info, { status: 500 });
   }
 }

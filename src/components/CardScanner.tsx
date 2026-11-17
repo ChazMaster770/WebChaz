@@ -506,12 +506,6 @@ export function CardScanner({
       setSearchMessage("Please enter both a Pokémon name and card number.");
       return;
     }
-    if (!capturedDataUrl) {
-      setSearchMessage(
-        "Take or upload a picture of the card first, or pick an online TCG match."
-      );
-      return;
-    }
 
     setSavingManual(true);
     try {
@@ -535,8 +529,8 @@ export function CardScanner({
           price: parseFloat(manualPrice) || 10,
           quantity: 1,
           forSale: defaultForSale,
-          capturedPhotoDataUrl: capturedDataUrl,
-          imageUrl: capturedDataUrl,
+          capturedPhotoDataUrl: capturedDataUrl || undefined,
+          imageUrl: capturedDataUrl || "",
         }),
       });
       if (res.ok) {
@@ -547,7 +541,17 @@ export function CardScanner({
         setQuickCondition(data.card.condition);
         setQuickQty(data.card.quantity);
         setShowManualForm(false);
+        setSearchMessage(null);
+      } else {
+        const err = (await res.json().catch(() => ({}))) as { error?: string; hint?: string };
+        setSearchMessage(
+          `${err.error || "Could not save the card."}${err.hint ? ` — ${err.hint}` : ""}`
+        );
       }
+    } catch (e) {
+      setSearchMessage(
+        e instanceof Error ? e.message : "Network error while saving the card."
+      );
     } finally {
       setSavingManual(false);
     }
@@ -1018,14 +1022,23 @@ export function CardScanner({
 
         {/* Right Column: Online Pokémon TCG Database Lookup & Matches (JP + EN) */}
         <div className="rounded-3xl border border-[#E6DFD2] bg-white p-5 shadow-xs lg:col-span-7">
-          <div>
-            <h2 className="font-display text-lg font-extrabold text-[#161B2E]">
-              2. Online Pokémon TCG Database (日本語 + English)
-            </h2>
-            <p className="text-xs text-slate-500">
-              Auto-filled from your photo, or type a name in English / 日本語 +
-              bottom set code & card number
-            </p>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <h2 className="font-display text-lg font-extrabold text-[#161B2E]">
+                2. Online Pokémon TCG Database (日本語 + English)
+              </h2>
+              <p className="text-xs text-slate-500">
+                Auto-filled from your photo, or type a name in English / 日本語 +
+                bottom set code & card number
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowManualForm((v) => !v)}
+              className="shrink-0 cursor-pointer rounded-xl border border-[#E2DBD0] bg-white px-3 py-1.5 text-[11px] font-bold text-[#161B2E] transition-colors hover:border-[#E3350D] hover:text-[#E3350D]"
+            >
+              {showManualForm ? "Hide manual entry" : "＋ Add manually"}
+            </button>
           </div>
 
           {/* OCR Extraction Summary Pills */}

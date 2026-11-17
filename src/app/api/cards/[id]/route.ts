@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { cardPhotos, collectionCards } from "@/db/schema";
 import { isAdminAuthenticated } from "@/lib/auth";
+import { describeDbError, ensureDatabaseReady } from "@/lib/db-init";
 
 export async function GET(
   _request: Request,
@@ -15,6 +16,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid card ID." }, { status: 400 });
     }
 
+    await ensureDatabaseReady();
     const rows = await db
       .select()
       .from(collectionCards)
@@ -50,6 +52,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid card ID." }, { status: 400 });
     }
 
+    await ensureDatabaseReady();
     const body = (await request.json()) as Record<string, unknown>;
     const updates: Partial<typeof collectionCards.$inferInsert> = {
       updatedAt: new Date(),
@@ -131,10 +134,7 @@ export async function PATCH(
     return NextResponse.json({ card: updated });
   } catch (err) {
     console.error("Error updating card:", err);
-    return NextResponse.json(
-      { error: "Failed to update card." },
-      { status: 500 }
-    );
+    return NextResponse.json(describeDbError(err), { status: 500 });
   }
 }
 
@@ -157,6 +157,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid card ID." }, { status: 400 });
     }
 
+    await ensureDatabaseReady();
     const [deleted] = await db
       .delete(collectionCards)
       .where(eq(collectionCards.id, cardId))
@@ -176,9 +177,6 @@ export async function DELETE(
     return NextResponse.json({ deletedId: deleted.id });
   } catch (err) {
     console.error("Error deleting card:", err);
-    return NextResponse.json(
-      { error: "Failed to remove card from collection." },
-      { status: 500 }
-    );
+    return NextResponse.json(describeDbError(err), { status: 500 });
   }
 }
